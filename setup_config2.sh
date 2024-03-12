@@ -1,16 +1,22 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]; then
+# Vérifier si un nom d'utilisateur a été fourni
+if [ "$#" -ne 1 ]; then
     echo "Usage: $0 USERNAME"
     exit 1
 fi
 
 USERNAME=$1
 
+# Générer un mot de passe sécurisé
+PASSWORD=$(openssl rand -base64 12)
+
 apt-get update
 
 wget https://raw.githubusercontent.com/serverok/squid-proxy-installer/master/squid3-install.sh -O squid3-install.sh
 bash squid3-install.sh
+
+/usr/bin/htpasswd -b -c /etc/squid/passwd "$USERNAME" "$PASSWORD"
 
 apt -y install dante-server
 
@@ -42,17 +48,12 @@ socks block {
 }
 EOF
 
-PASS=$(openssl rand -base64 12)
-
-/usr/bin/htpasswd -b -c /etc/squid/passwd $USERNAME $PASS
-echo "Mot de passe pour $USERNAME est $PASS"
-
-useradd $USERNAME --shell /usr/sbin/nologin
-echo "$USERNAME:$PASS" | chpasswd
+useradd "$USERNAME" --shell /usr/sbin/nologin
+echo "$USERNAME:$PASSWORD" | chpasswd
 
 systemctl enable danted
 systemctl enable squid
 systemctl start danted
 systemctl start squid
 
-echo "Installation terminée. Votre mot de passe est: $PASS"
+echo "Le mot de passe pour $USERNAME est: $PASSWORD"
