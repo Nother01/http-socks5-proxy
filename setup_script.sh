@@ -45,10 +45,11 @@ EOF
 PASS=$(openssl rand -base64 12)
 
 /usr/bin/htpasswd -b -c /etc/squid/passwd $USERNAME $PASS
-echo "Mot de passe pour $USERNAME est $PASS"
 
 useradd $USERNAME --shell /usr/sbin/nologin
-echo "$USERNAME:$PASS" | chpasswd
+echo $PASS"\n"$PASS | passwd $USERNAME
+
+echo "Mot de passe pour $USERNAME est $PASS"
 
 systemctl enable danted
 systemctl enable squid
