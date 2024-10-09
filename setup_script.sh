@@ -7,7 +7,7 @@ fi
 
 PUBLIC_IPV4=$(dig +short myip.opendns.com @resolver1.opendns.com)
 USERNAME=$1
-PASSWORD=$(openssl rand -base64 12)
+PASSWORD=$(openssl randPASSWORD=$(openssl rand -base64 12 | tr -d '/+=') -base64 12)
 
 apt-get update
 
