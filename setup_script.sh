@@ -86,7 +86,7 @@ echo "========================================"
 echo "Test proxy HTTP..."
 HTTP_TEST=$(curl -s --proxy http://$USERNAME:$PASSWORD@$PUBLIC_IPV4:3128 http://www.google.com -o /dev/null -w "%{http_code}")
 if [ "$HTTP_TEST" -eq 200 ]; then
-    echo "Le proxy HTTP fonctionne correctement."
+    echo "http://$USERNAME:$PASSWORD@$PUBLIC_IPV4:3128 | OK"
 else
     echo "Échec du test du proxy HTTP, code de réponse : $HTTP_TEST"
 fi
