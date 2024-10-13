@@ -20,11 +20,11 @@ systemctl disable squid danted
 
 apt-get purge -y squid dante-server
 
-rm -rf /etc/squid
-rm -rf /etc/danted.conf
-rm -rf /var/log/danted.log
-rm -rf /etc/systemd/system/squid.service
-rm -rf /etc/systemd/system/danted.service
+sudo rm -rf /etc/squid
+sudo rm -rf /etc/danted.conf
+sudo rm -rf /var/log/danted.log
+sudo rm -rf /etc/systemd/system/squid.service
+sudo rm -rf /etc/systemd/system/danted.service
 
 if id "$USERNAME" &>/dev/null; then
     userdel -r "$USERNAME"

@@ -93,7 +93,7 @@ fi
 
 if [ "$WITH_SOCKS5" = true ]; then
     echo "Test proxy SOCKS5..."
-    SOCKS_TEST=$(curl -s --socks5 $PUBLIC_IPV4:1080 http://www.google.com -o /dev/null -w "%{http_code}")
+    SOCKS_TEST=$(curl -s --socks5-user $USERNAME:$PASSWORD --socks5 $PUBLIC_IPV4:1080 http://www.google.com -o /dev/null -w "%{http_code}")
     if [ "$SOCKS_TEST" -eq 200 ]; then
         echo "Le proxy SOCKS5 fonctionne correctement."
     else
