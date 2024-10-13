@@ -1,61 +1,36 @@
 #!/bin/bash
 
+if [ "$EUID" -ne 0 ]; then
+    echo "Veuillez exécuter ce script en tant que root."
+    exit 1
+fi
+
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 USERNAME"
     exit 1
 fi
 
 USERNAME=$1
-PASSWORD=$(openssl rand -base64 12 | tr -d '/+=')
-PUBLIC_IPV4=$(dig +short myip.opendns.com @resolver1.opendns.com)
 
-echo "Réinitialisation de la configuration HTTP/SOCKS5..."
+echo "Suppression des services Squid et Dante..."
 
 systemctl stop squid danted
+
+systemctl disable squid danted
+
 apt-get purge -y squid dante-server
 
-apt-get update
-wget https://raw.githubusercontent.com/serverok/squid-proxy-installer/master/squid3-install.sh -O squid3-install.sh
-bash squid3-install.sh
+rm -rf /etc/squid
+rm -rf /etc/danted.conf
+rm -rf /var/log/danted.log
+rm -rf /etc/systemd/system/squid.service
+rm -rf /etc/systemd/system/danted.service
 
-htpasswd -b -c /etc/squid/passwd "$USERNAME" "$PASSWORD"
+if id "$USERNAME" &>/dev/null; then
+    userdel -r "$USERNAME"
+    echo "Utilisateur $USERNAME supprimé."
+else
+    echo "Utilisateur $USERNAME n'existe pas."
+fi
 
-apt-get install -y dante-server
-
-cat <<EOF > /etc/danted.conf
-logoutput: /var/log/danted.log
-internal: eth0 port = 1080
-external: eth0
-clientmethod: none
-socksmethod: username
-user.privileged: root
-user.notprivileged: nobody
-client pass {
-    from: 0.0.0.0/0 to: 0.0.0.0/0
-    log: error connect disconnect
-}
-client block {
-    from: 0.0.0.0/0 to: 0.0.0.0/0
-    log: connect error
-}
-socks pass {
-    from: 0.0.0.0/0 to: 0.0.0.0/0
-    command: bind connect udpassociate
-    log: error connect disconnect
-    socksmethod: username
-}
-socks block {
-    from: 0.0.0.0/0 to: 0.0.0.0/0
-    log: connect error
-}
-EOF
-
-useradd "$USERNAME" --shell /usr/sbin/nologin
-echo "$USERNAME:$PASSWORD" | chpasswd
-
-systemctl enable squid danted
-systemctl restart squid danted
-
-echo "HTTP Proxy (Squid) configuré."
-echo "SOCKS5 Proxy (Dante) configuré."
-echo "Accès: $PUBLIC_IPV4 avec l'utilisateur $USERNAME et mot de passe $PASSWORD"
+echo "HTTP (Squid) et SOCKS5 (Dante) supprimés avec succès."
