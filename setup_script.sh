@@ -86,18 +86,19 @@ echo "========================================"
 echo "Test proxy HTTP..."
 HTTP_TEST=$(curl -s --proxy http://$USERNAME:$PASSWORD@$PUBLIC_IPV4:3128 http://www.google.com -o /dev/null -w "%{http_code}")
 if [ "$HTTP_TEST" -eq 200 ]; then
-    echo "http://$USERNAME:$PASSWORD@$PUBLIC_IPV4:3128 | OK"
+    echo "http://$USERNAME:$PASSWORD@$PUBLIC_IPV4:3128" >> log.http
+    cat log.http
 else
-    echo "Échec du test du proxy HTTP, code de réponse : $HTTP_TEST"
+    echo "Échec du test du proxy HTTP, code de réponse : $HTTP_TEST\n"
 fi
 
 if [ "$WITH_SOCKS5" = true ]; then
     echo "Test proxy SOCKS5..."
-    SOCKS_TEST=$(curl -s --socks5-user $USERNAME:$PASSWORD --socks5 $PUBLIC_IPV4:1080 http://www.google.com -o /dev/null -w "%{http_code}")
-    if [ "$SOCKS_TEST" -eq 200 ]; then
-        echo "Le proxy SOCKS5 fonctionne correctement."
+    SOCKS5_TEST=$(curl -s --proxy socks5://$USERNAME:$PASSWORD@$PUBLIC_IPV4:1080 http://www.google.com -o /dev/null -w "%{http_code}")
+    if [ "$SOCKS5_TEST" -eq 200 ]; then
+        echo "socks5://$USERNAME:$PASSWORD@$PUBLIC_IPV4:1080" >> log.socks5
     else
-        echo "Échec du test du proxy SOCKS5, code de réponse : $SOCKS_TEST"
+        echo "Échec du test du proxy SOCKS5, code de réponse : $SOCKS5_TEST\n"
     fi
 fi
 
